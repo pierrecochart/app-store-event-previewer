@@ -3,23 +3,50 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="canonical" href="https://pierrecochart.github.io/app-store-event-previewer/" />
+    <link rel="canonical" href="https://pierrecochart.github.io/app-store-event-previewer/" />
     <title>Apple App Store Event Card Previewer | Pierre Cochart</title>
+    <meta name="description" content="Preview how your In-App Event's card and detail view will look on the App Store before you submit — badge, title, description, and imagery, rendered with an authentic iOS blur effect. Free and client-side.">
+    <meta property="og:title" content="Apple App Store Event Card Previewer">
+    <meta property="og:description" content="Preview your In-App Event metadata and images exactly as they'll appear on the App Store. Free, no uploads.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://pierrecochart.github.io/app-store-event-previewer/">
+    <meta property="og:image" content="https://placehold.co/1200x630/0F6E8C/FAFAF7?font=roboto&text=App+Store+Event+Previewer">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="https://placehold.co/1200x630/0F6E8C/FAFAF7?font=roboto&text=App+Store+Event+Previewer">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+
     <style>
         :root {
-            --ios-blue: #007AFF;
-            --ios-gray: #8E8E93;
-            --ios-bg: #F2F2F7;
+            --paper: #FAFAF7;
+            --panel: #EFEEE7;
+            --ink: #191D22;
+            --ink-soft: #565C64;
+            --line: #DAD7CC;
+            --blueprint: #0F6E8C;
+            --blueprint-dark: #0B5570;
+            --amber: #E8A33D;
+            --signal-red: #D14343;
+            --font-display: 'Space Grotesk', sans-serif;
+            --font-body: 'Inter', sans-serif;
+            --font-mono: 'IBM Plex Mono', monospace;
+
+            /* Kept separate on purpose: used only inside the App Store mockup
+               itself, so the preview accurately reflects Apple's real UI font
+               rather than the site's own brand type. */
+            --ios-font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+
             --card-radius: 12px;
-            --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         }
 
         body {
-            font-family: var(--font-family);
-            background-color: var(--ios-bg);
+            font-family: var(--font-body);
+            background-color: var(--panel);
             margin: 0;
             padding: 20px;
-            color: #1c1c1e;
+            color: var(--ink);
         }
 
         .container {
@@ -30,33 +57,40 @@
             gap: 40px;
         }
 
-        h1 { font-size: 24px; margin-bottom: 20px; }
-        h2 { font-size: 18px; margin-bottom: 15px; color: #333; border-bottom: 1px solid #ccc; padding-bottom: 5px; }
+        h1 { font-family: var(--font-display); font-size: 26px; font-weight: 700; margin-bottom: 20px; color: var(--ink); }
+        h2 { font-family: var(--font-display); font-size: 18px; font-weight: 600; margin-bottom: 15px; color: var(--ink); border-bottom: 1px solid var(--line); padding-bottom: 5px; }
 
         /* Input Section Styles */
         .controls {
-            background: white;
+            background: var(--paper);
             padding: 24px;
             border-radius: 16px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            border: 1px solid var(--line);
             display: flex;
             flex-direction: column;
         }
 
         .form-group { margin-bottom: 20px; }
-        label { display: block; font-weight: 600; margin-bottom: 8px; font-size: 14px; }
-        .hint { font-size: 12px; color: var(--ios-gray); margin-top: 4px; display: block; }
-        
-        input[type="text"], 
-        textarea, 
+        label { display: block; font-weight: 600; margin-bottom: 8px; font-size: 14px; color: var(--ink); }
+        .hint { font-size: 12px; color: var(--ink-soft); margin-top: 4px; display: block; }
+
+        input[type="text"],
+        textarea,
         select {
             width: 100%;
             padding: 10px;
-            border: 1px solid #d1d1d6;
-            border-radius: 8px;
+            border: 1px solid var(--line);
+            border-radius: 6px;
             font-size: 14px;
-            font-family: inherit;
-            box-sizing: border-box; 
+            font-family: var(--font-body);
+            color: var(--ink);
+            background: var(--paper);
+            box-sizing: border-box;
+        }
+        input[type="text"]:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: var(--blueprint);
+            box-shadow: 0 0 0 1px var(--blueprint);
         }
 
         input[type="file"] { margin-top: 5px; font-size: 14px; }
@@ -65,10 +99,10 @@
         .char-count {
             text-align: right;
             font-size: 12px;
-            color: var(--ios-gray);
+            color: var(--ink-soft);
             margin-top: 4px;
         }
-        .char-count.limit-reached { color: #FF3B30; }
+        .char-count.limit-reached { color: var(--signal-red); }
 
         /* PREVIEW STYLES */
         .previews {
@@ -92,30 +126,27 @@
             display: block;
         }
 
-        /* --- THE MAGIC BLUR LOGIC --- */
+        /* --- THE MAGIC BLUR LOGIC (unchanged — mimics real App Store rendering) --- */
         .blur-overlay {
             position: absolute;
             bottom: 0;
             left: 0;
             width: 100%;
-            height: 55%; /* Covers bottom half */
-            
-            /* 1. The Blur (Samples the image color) */
+            height: 55%;
+
             backdrop-filter: blur(50px) saturate(180%);
             -webkit-backdrop-filter: blur(50px) saturate(180%);
-            
-            /* 2. Darkening tint (to ensure white text is readable) */
-            background: linear-gradient(to bottom, 
-                rgba(0,0,0,0) 0%, 
-                rgba(0,0,0,0.1) 20%, 
+
+            background: linear-gradient(to bottom,
+                rgba(0,0,0,0) 0%,
+                rgba(0,0,0,0.1) 20%,
                 rgba(0,0,0,0.3) 50%,
                 rgba(0,0,0,0.6) 100%
             );
 
-            /* 3. The Mask: Fades the blur in so there is no hard line at the top */
             -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 40%);
             mask-image: linear-gradient(to bottom, transparent 0%, black 40%);
-            
+
             pointer-events: none;
             z-index: 1;
         }
@@ -130,6 +161,7 @@
             color: white;
             z-index: 2;
             text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            font-family: var(--ios-font);
         }
 
         .badge {
@@ -157,14 +189,13 @@
             line-height: 1.4;
         }
 
-        /* Specific Sizes */
         .card-preview {
             width: 100%;
             aspect-ratio: 16 / 9;
         }
 
         .detail-preview {
-            width: 65%; /* Phone width simulation */
+            width: 65%;
             aspect-ratio: 9 / 19.5;
             margin: 0 auto;
         }
@@ -173,190 +204,514 @@
             margin-top: 15px;
             text-align: center;
             font-size: 13px;
-            color: #666;
+            color: var(--ink-soft);
         }
 
         .drop-zone {
-            border: 2px dashed #ccc;
+            border: 2px dashed var(--line);
             padding: 20px;
             text-align: center;
             border-radius: 8px;
             cursor: pointer;
             transition: border-color 0.3s;
-            background: #fafafa;
+            background: var(--panel);
         }
-        .drop-zone:hover { border-color: var(--ios-blue); }
-        .drop-zone p { margin: 0; font-size: 13px; color: #666; }
+        .drop-zone:hover { border-color: var(--blueprint); }
+        .drop-zone p { margin: 0; font-size: 13px; color: var(--ink-soft); }
 
-        /* BMC Section */
-        .bmc-container {
-            margin-top: 40px;
-            padding-top: 20px;
-            border-top: 1px solid #eee;
-            text-align: center;
-        }
-        .bmc-container p {
-            font-size: 13px;
-            color: var(--ios-gray);
-            margin-bottom: 15px;
-            line-height: 1.4;
-        }
-        .bmc-btn-link img {
-            height: 40px !important;
-            width: auto !important;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            transition: transform 0.2s ease;
-        }
-        .bmc-btn-link img:hover { transform: scale(1.05); }
+        /* Buy Me a Coffee card (standardised component) */
+        .bmc-card { margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--line); text-align: center; }
+        .bmc-card__icon { font-size: 1.4rem; margin-bottom: 6px; }
+        .bmc-card__heading { font-family: var(--font-display); font-weight: 600; font-size: 0.98rem; color: var(--ink); margin: 0 0 6px; }
+        .bmc-card__text { font-size: 12.5px; color: var(--ink-soft); margin-bottom: 14px; line-height: 1.5; }
+        .bmc-card__button { display: inline-flex; align-items: center; gap: 8px; background: var(--blueprint); color: #fff; text-decoration: none; font-family: var(--font-body); font-weight: 600; font-size: 0.85rem; padding: 10px 18px; border-radius: 6px; transition: background .15s ease; }
+        .bmc-card__button:hover { background: var(--blueprint-dark); }
+        .bmc-card__button svg { width: 16px; height: 16px; flex-shrink: 0; }
 
         @media (max-width: 768px) {
             .container { grid-template-columns: 1fr; }
             .detail-preview { width: 80%; }
         }
+
+        /* --- Site header --- */
+        .site-header { background: var(--paper); border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 100; font-family: var(--font-body); }
+        .site-header__ruler { height: 4px; background-image: repeating-linear-gradient(90deg, var(--blueprint) 0 1px, transparent 1px 12px); opacity: 0.5; }
+        .site-header__inner { max-width: 1140px; margin: 0 auto; padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; }
+        .site-header__brand { text-decoration: none; color: var(--ink); line-height: 1.1; }
+        .site-header__eyebrow { display: block; font-family: var(--font-mono); font-size: 0.65rem; letter-spacing: 0.14em; color: var(--blueprint); text-transform: uppercase; margin-bottom: 2px; }
+        .site-header__wordmark { display: block; font-family: var(--font-display); font-weight: 700; font-size: 1.15rem; color: var(--ink); }
+        .nav-toggle { display: none; flex-direction: column; gap: 4px; background: none; border: 1px solid var(--line); border-radius: 4px; cursor: pointer; padding: 8px 10px; }
+        .nav-toggle span { width: 18px; height: 2px; background: var(--ink); display: block; }
+        .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+        .site-nav__list { display: flex; gap: 4px; list-style: none; margin: 0; padding: 0; }
+        .site-nav__item { position: relative; }
+        .site-nav__link { background: none; border: none; font: inherit; font-family: var(--font-body); font-weight: 500; font-size: 0.92rem; cursor: pointer; padding: 9px 12px; color: var(--ink); text-decoration: none; display: inline-block; border-radius: 4px; }
+        .site-nav__link:hover, .site-nav__link:focus { color: var(--blueprint); background: var(--panel); }
+        .dropdown { list-style: none; margin: 0; padding: 6px; position: absolute; top: 100%; left: 0; background: var(--paper); border: 1px solid var(--line); border-radius: 6px; box-shadow: 0 10px 28px rgba(25,29,34,0.10); min-width: 250px; opacity: 0; visibility: hidden; transform: translateY(6px); transition: opacity .15s ease, transform .15s ease, visibility .15s; }
+        .has-dropdown:hover .dropdown, .has-dropdown:focus-within .dropdown { opacity: 1; visibility: visible; transform: translateY(0); }
+        .dropdown li a { display: block; padding: 8px 10px; color: var(--ink); text-decoration: none; border-radius: 4px; font-size: 0.88rem; border-left: 2px solid transparent; }
+        .dropdown li a:hover, .dropdown li a:focus { background: var(--panel); border-left-color: var(--blueprint); color: var(--blueprint-dark); }
+        @media (max-width: 860px) {
+          .nav-toggle { display: flex; }
+          .site-nav { display: none; width: 100%; order: 3; }
+          .site-nav.is-open { display: block; }
+          .site-nav__list { flex-direction: column; gap: 0; }
+          .site-nav__item { width: 100%; }
+          .dropdown { position: static; opacity: 1; visibility: visible; transform: none; box-shadow: none; border: none; display: none; padding-left: 10px; }
+          .has-dropdown.is-open .dropdown { display: block; }
+          .site-header__inner { flex-wrap: wrap; }
+        }
+
+        /* --- SEO content block --- */
+        .tool-content { max-width: 780px; margin: 64px auto; padding: 0 20px; font-family: var(--font-body); color: var(--ink); line-height: 1.65; }
+        .tool-content h2 { font-family: var(--font-display); font-size: 1.5rem; margin: 40px 0 14px; color: var(--ink); border-bottom: none; padding-bottom: 0; }
+        .tool-content p { font-size: 0.98rem; color: var(--ink-soft); margin: 0 0 14px; }
+        .faq-item { position: relative; border: 1px solid var(--line); border-radius: 6px; padding: 4px 16px; margin-bottom: 10px; background: var(--paper); }
+        .faq-item::before, .faq-item::after { content: ""; position: absolute; width: 10px; height: 10px; border-color: var(--blueprint); border-style: solid; opacity: 0.6; }
+        .faq-item::before { top: -1px; left: -1px; border-width: 2px 0 0 2px; }
+        .faq-item::after { bottom: -1px; right: -1px; border-width: 0 2px 2px 0; }
+        .faq-item summary { cursor: pointer; font-weight: 600; padding: 14px 0; font-size: 0.96rem; list-style: none; }
+        .faq-item summary::-webkit-details-marker { display: none; }
+        .faq-item summary::after { content: "+"; float: right; font-family: var(--font-mono); color: var(--blueprint); }
+        .faq-item[open] summary::after { content: "–"; }
+        .faq-item p { padding-bottom: 14px; margin: 0; }
+        .related-tools { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 16px; }
+        .related-tools__card { position: relative; display: block; border: 1px solid var(--line); border-radius: 6px; padding: 18px; text-decoration: none; background: var(--paper); transition: border-color .15s ease; }
+        .related-tools__card:hover { border-color: var(--blueprint); }
+        .related-tools__card::before, .related-tools__card::after { content: ""; position: absolute; width: 10px; height: 10px; border-color: var(--blueprint); border-style: solid; opacity: 0.6; }
+        .related-tools__card::before { top: -1px; left: -1px; border-width: 2px 0 0 2px; }
+        .related-tools__card::after { bottom: -1px; right: -1px; border-width: 0 2px 2px 0; }
+        .related-tools__eyebrow { font-family: var(--font-mono); font-size: 0.62rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--blueprint); margin: 0 0 6px; }
+        .related-tools__name { font-family: var(--font-display); font-weight: 600; font-size: 0.98rem; color: var(--ink); margin: 0 0 4px; }
+        .related-tools__desc { font-size: 0.85rem; color: var(--ink-soft); margin: 0; }
+        @media (max-width: 720px) { .related-tools { grid-template-columns: 1fr; } }
+
+        /* --- Site footer --- */
+        .site-footer { background: var(--panel); border-top: 1px solid var(--line); margin-top: 60px; font-family: var(--font-body); }
+        .site-footer__cta { border-bottom: 1px solid var(--line); }
+        .site-footer__cta-inner { max-width: 1140px; margin: 0 auto; padding: 36px 20px; display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
+        .site-footer__cta-text { font-family: var(--font-mono); font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--blueprint); margin: 0 0 4px; }
+        .site-footer__cta-heading { font-family: var(--font-display); font-weight: 600; font-size: 1.2rem; color: var(--ink); margin: 0; }
+        .site-footer__cta-link { font-family: var(--font-body); font-weight: 600; font-size: 0.9rem; color: #fff; background: var(--blueprint); text-decoration: none; padding: 12px 20px; border-radius: 6px; white-space: nowrap; transition: background .15s ease; }
+        .site-footer__cta-link:hover { background: var(--blueprint-dark); }
+        .site-footer__inner { max-width: 1140px; margin: 0 auto; padding: 40px 20px 20px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
+        .site-footer__col h3 { font-family: var(--font-mono); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-soft); margin: 0 0 12px; padding-bottom: 8px; border-bottom: 1px solid var(--line); }
+        .site-footer__col ul { list-style: none; margin: 0; padding: 0; }
+        .site-footer__col li { margin-bottom: 8px; }
+        .site-footer__col a { color: var(--ink); text-decoration: none; font-size: 0.9rem; }
+        .site-footer__col a:hover { color: var(--blueprint); text-decoration: underline; }
+        .site-footer__bottom { max-width: 1140px; margin: 0 auto; padding: 18px 20px 30px; border-top: 1px solid var(--line); font-size: 0.82rem; color: var(--ink-soft); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+        .site-footer__bottom a { color: var(--ink-soft); }
+        .site-footer__bottom a:hover { color: var(--blueprint); }
+        @media (max-width: 860px) { .site-footer__inner { grid-template-columns: repeat(2, 1fr); } }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <div class="controls">
-            <h1>App Store Event Previewer</h1>
-            
-            <h2>Event Details</h2>
-            
-            <div class="form-group">
-                <label>Event Badge</label>
-                <select id="badgeSelect" onchange="updatePreview()">
-                    <option value="CHALLENGE">Challenge</option>
-                    <option value="COMPETITION">Competition</option>
-                    <option value="LIVE EVENT">Live Event</option>
-                    <option value="MAJOR UPDATE">Major Update</option>
-                    <option value="NEW SEASON">New Season</option>
-                    <option value="PREMIERE">Premiere</option>
-                    <option value="SPECIAL EVENT">Special Event</option>
-                </select>
-            </div>
+<header class="site-header">
+  <div class="site-header__ruler"></div>
+  <div class="site-header__inner">
+    <a class="site-header__brand" href="https://pierrecochart.github.io/">
+      <span class="site-header__eyebrow">Free Web Toolkit</span>
+      <span class="site-header__wordmark">Pierre Cochart</span>
+    </a>
 
-            <div class="form-group">
-                <label>Event Name</label>
-                <input type="text" id="eventName" maxlength="30" placeholder="e.g. Summer Showdown" oninput="updatePreview(this)">
-                <div class="char-count"><span id="nameCount">0</span>/30</div>
-            </div>
+    <button class="nav-toggle" id="navToggle" aria-expanded="false" aria-controls="siteNav">
+      <span></span><span></span><span></span>
+      <span class="sr-only">Menu</span>
+    </button>
 
-            <div class="form-group">
-                <label>Short Description (Card)</label>
-                <input type="text" id="shortDesc" maxlength="50" placeholder="e.g. Compete for the ultimate prize." oninput="updatePreview(this)">
-                <div class="char-count"><span id="shortCount">0</span>/50</div>
-                <span class="hint">Appears on the standard Event Card.</span>
-            </div>
+    <nav class="site-nav" id="siteNav">
+      <ul class="site-nav__list">
+        <li class="site-nav__item has-dropdown">
+          <button class="site-nav__link" aria-expanded="false">Image &amp; Media</button>
+          <ul class="dropdown">
+            <li><a href="https://pierrecochart.github.io/image-cropper/">Bulk Image Cropper</a></li>
+            <li><a href="https://pierrecochart.github.io/image-background-remover/">Image Background Remover</a></li>
+            <li><a href="https://pierrecochart.github.io/color-palette-generator/">Color Palette Generator</a></li>
+            <li><a href="https://pierrecochart.github.io/duotone-generator/">Duotone Generator</a></li>
+            <li><a href="https://pierrecochart.github.io/image-dithering-tool/">Image Dithering Tool</a></li>
+            <li><a href="https://pierrecochart.github.io/advanced-image-cropping-tool/">Advanced Image Cropper</a></li>
+            <li><a href="https://pierrecochart.github.io/image-to-webp-converter/">Image to WebP Converter</a></li>
+            <li><a href="https://pierrecochart.github.io/quickfav-favicon-maker/">QuickFav Favicon Maker</a></li>
+            <li><a href="https://pierrecochart.github.io/svg-cleaner/">SVG Cleaner</a></li>
+            <li><a href="https://pierrecochart.github.io/code-screenshot-image-creator/">Code Screenshot Generator</a></li>
+          </ul>
+        </li>
+        <li class="site-nav__item has-dropdown">
+          <button class="site-nav__link" aria-expanded="false">SEO &amp; Content</button>
+          <ul class="dropdown">
+            <li><a href="https://pierrecochart.github.io/canonical-generating-tool/">Canonical Generator</a></li>
+            <li><a href="https://pierrecochart.github.io/useful-links-builder/">Useful Links Builder</a></li>
+            <li><a href="https://pierrecochart.github.io/hreflang-generator-tool/">Hreflang Generator</a></li>
+            <li><a href="https://pierrecochart.github.io/website-migration-bulk-redirect-tool/">Bulk Redirect Mapper</a></li>
+            <li><a href="https://pierrecochart.github.io/google-dork-search-operator-tool/">Google Dork Builder</a></li>
+            <li><a href="https://pierrecochart.github.io/keyword-mixer-tool/">Keyword Mixer</a></li>
+            <li><a href="https://pierrecochart.github.io/SERP-Snippet-Viewer-Optimiser/">SERP Simulator</a></li>
+            <li><a href="https://pierrecochart.github.io/seo-bulk-header-audit-tool/">SEO Header Audit</a></li>
+            <li><a href="https://pierrecochart.github.io/faq-generator/">FAQ &amp; Schema Generator</a></li>
+            <li><a href="https://pierrecochart.github.io/internal-link-weaver/">Internal Link Weaver</a></li>
+            <li><a href="https://pierrecochart.github.io/word-character-counter-read-time/">Word &amp; Character Counter</a></li>
+            <li><a href="https://pierrecochart.github.io/ai-blog-summarizer-button-generator/">AI Blog Summarizer</a></li>
+          </ul>
+        </li>
+        <li class="site-nav__item has-dropdown">
+          <button class="site-nav__link" aria-expanded="false">PPC &amp; Analytics</button>
+          <ul class="dropdown">
+            <li><a href="https://pierrecochart.github.io/google-adwords-campaign-architect-tool/">AdWords Architect</a></li>
+            <li><a href="https://pierrecochart.github.io/roas-modeller/">ROAS Modeller</a></li>
+            <li><a href="https://pierrecochart.github.io/statistical-significance-calculator/">Significance Calculator</a></li>
+          </ul>
+        </li>
+        <li class="site-nav__item has-dropdown">
+          <button class="site-nav__link" aria-expanded="false">Development</button>
+          <ul class="dropdown">
+            <li><a href="https://pierrecochart.github.io/document-html-link-remover/">Link Remover Tool</a></li>
+            <li><a href="https://pierrecochart.github.io/word-doc-content-sanitizer/">Word Content Sanitizer</a></li>
+            <li><a href="https://pierrecochart.github.io/github-website-builder/">GitHub Website Builder</a></li>
+            <li><a href="https://pierrecochart.github.io/html-editor/">HTML Editor</a></li>
+            <li><a href="https://pierrecochart.github.io/app-store-event-previewer/">App Store Event Previewer</a></li>
+          </ul>
+        </li>
+        <li class="site-nav__item">
+          <a class="site-nav__link" href="https://searchfoundry.co.uk" target="_blank" rel="noopener">SEO/PPC Help ↗</a>
+        </li>
+      </ul>
+    </nav>
+  </div>
+</header>
 
-            <div class="form-group">
-                <label>Long Description</label>
-                <textarea id="longDesc" maxlength="120" placeholder="Details about the event..." oninput="updatePreview(this)"></textarea>
-                <div class="char-count"><span id="longCount">0</span>/120</div>
-                <span class="hint">Use this to store your long text.</span>
-            </div>
+<div class="container" style="margin-top:40px;">
+    <div class="controls">
+        <h1>App Store Event Previewer</h1>
 
-            <h2>Assets</h2>
-            
-            <div class="form-group">
-                <label>Card Image (Landscape 16:9)</label>
-                <div class="drop-zone" onclick="document.getElementById('cardImgInput').click()">
-                    <p>Click to upload 1920x1080</p>
-                    <input type="file" id="cardImgInput" accept="image/*" style="display:none" onchange="loadImage(this, 'cardPreviewImg')">
-                </div>
-            </div>
+        <h2>Event Details</h2>
 
-            <div class="form-group">
-                <label>Detail Image (Portrait 9:16)</label>
-                <div class="drop-zone" onclick="document.getElementById('detailImgInput').click()">
-                    <p>Click to upload 1080x1920</p>
-                    <input type="file" id="detailImgInput" accept="image/*" style="display:none" onchange="loadImage(this, 'detailPreviewImg')">
-                </div>
-            </div>
+        <div class="form-group">
+            <label>Event Badge</label>
+            <select id="badgeSelect" onchange="updatePreview()">
+                <option value="CHALLENGE">Challenge</option>
+                <option value="COMPETITION">Competition</option>
+                <option value="LIVE EVENT">Live Event</option>
+                <option value="MAJOR UPDATE">Major Update</option>
+                <option value="NEW SEASON">New Season</option>
+                <option value="PREMIERE">Premiere</option>
+                <option value="SPECIAL EVENT">Special Event</option>
+            </select>
+        </div>
 
-            <div class="bmc-container">
-                <div><p>This tool is completely free. If you find it useful or use it regularly, consider donating a small amount to help towards its maintenance.</p></div>
-                <a href="https://www.buymeacoffee.com/PierreCochart" target="_blank" class="bmc-btn-link">
-                    <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee">
-                </a>
+        <div class="form-group">
+            <label>Event Name</label>
+            <input type="text" id="eventName" maxlength="30" placeholder="e.g. Summer Showdown" oninput="updatePreview(this)">
+            <div class="char-count"><span id="nameCount">0</span>/30</div>
+        </div>
+
+        <div class="form-group">
+            <label>Short Description (Card)</label>
+            <input type="text" id="shortDesc" maxlength="50" placeholder="e.g. Compete for the ultimate prize." oninput="updatePreview(this)">
+            <div class="char-count"><span id="shortCount">0</span>/50</div>
+            <span class="hint">Appears on the standard Event Card.</span>
+        </div>
+
+        <div class="form-group">
+            <label>Long Description</label>
+            <textarea id="longDesc" maxlength="120" placeholder="Details about the event..." oninput="updatePreview(this)"></textarea>
+            <div class="char-count"><span id="longCount">0</span>/120</div>
+            <span class="hint">Use this to store your long text.</span>
+        </div>
+
+        <h2>Assets</h2>
+
+        <div class="form-group">
+            <label>Card Image (Landscape 16:9)</label>
+            <div class="drop-zone" onclick="document.getElementById('cardImgInput').click()">
+                <p>Click to upload 1920x1080</p>
+                <input type="file" id="cardImgInput" accept="image/*" style="display:none" onchange="loadImage(this, 'cardPreviewImg')">
             </div>
         </div>
 
-        <div class="previews">
-            
-            <div>
-                <h2>1. Event Card</h2>
-                <div class="mockup-container card-preview">
-                    <img id="cardPreviewImg" class="mockup-img" src="https://picsum.photos/1920/1080" alt="Card Preview">
-                    
-                    <div class="blur-overlay"></div>
-                    
-                    <div class="content-layer">
-                        <span class="badge prevBadge">CHALLENGE</span>
-                        <div class="event-title prevTitle">Event Name</div>
-                        <div class="event-short prevShort">Short description goes here.</div>
-                    </div>
-                </div>
-          
+        <div class="form-group">
+            <label>Detail Image (Portrait 9:16)</label>
+            <div class="drop-zone" onclick="document.getElementById('detailImgInput').click()">
+                <p>Click to upload 1080x1920</p>
+                <input type="file" id="detailImgInput" accept="image/*" style="display:none" onchange="loadImage(this, 'detailPreviewImg')">
             </div>
+        </div>
 
-            <div>
-                <h2>2. Event Details (Opened View)</h2>
-                <div class="mockup-container detail-preview">
-                    <img id="detailPreviewImg" class="mockup-img" src="https://picsum.photos/1080/1920" alt="Detail Preview">
-                    
-                    <div class="blur-overlay"></div>
-
-                    <div class="content-layer">
-                        <span class="badge prevBadge">CHALLENGE</span>
-                        <div class="event-title prevTitle">Event Name</div>
-                        <div class="event-short prevShort">Short description goes here.</div>
-                    </div>
-                </div>
-                <div class="detail-info">
-                  
-                </div>
-            </div>
-
+        <div class="bmc-card">
+            <div class="bmc-card__icon">☕</div>
+            <p class="bmc-card__heading">This tool is free to use</p>
+            <p class="bmc-card__text">If it saved you some time, consider buying me a coffee to support future updates.</p>
+            <a class="bmc-card__button" href="https://www.buymeacoffee.com/PierreCochart" target="_blank" rel="noopener">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 10h14a2 2 0 0 1 2 2v1a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4v-3Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M20 12h1a2 2 0 0 1 2 2 3 3 0 0 1-3 3h-1" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M8 3c-.5 1-.5 1.8 0 2.5M12 3c-.5 1-.5 1.8 0 2.5M16 3c-.5 1-.5 1.8 0 2.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+                Buy me a coffee
+            </a>
         </div>
     </div>
 
-    <script>
-        function updatePreview(inputElement) {
-            const badge = document.getElementById('badgeSelect').value;
-            const title = document.getElementById('eventName').value || "Event Name";
-            const short = document.getElementById('shortDesc').value || "Short description goes here.";
-            
-            // Update Text
-            document.querySelectorAll('.prevBadge').forEach(el => el.textContent = badge);
-            document.querySelectorAll('.prevTitle').forEach(el => el.textContent = title);
-            document.querySelectorAll('.prevShort').forEach(el => el.textContent = short);
+    <div class="previews">
 
-            // Update Character Counts
-            if(inputElement) {
-                const countSpan = inputElement.nextElementSibling.querySelector('span');
-                const max = inputElement.getAttribute('maxlength');
-                const current = inputElement.value.length;
-                countSpan.textContent = current;
-                
-                if(current >= max) {
-                    inputElement.nextElementSibling.classList.add('limit-reached');
-                } else {
-                    inputElement.nextElementSibling.classList.remove('limit-reached');
-                }
+        <div>
+            <h2>1. Event Card</h2>
+            <div class="mockup-container card-preview">
+                <img id="cardPreviewImg" class="mockup-img" src="https://picsum.photos/1920/1080" alt="Card Preview">
+
+                <div class="blur-overlay"></div>
+
+                <div class="content-layer">
+                    <span class="badge prevBadge">CHALLENGE</span>
+                    <div class="event-title prevTitle">Event Name</div>
+                    <div class="event-short prevShort">Short description goes here.</div>
+                </div>
+            </div>
+
+        </div>
+
+        <div>
+            <h2>2. Event Details (Opened View)</h2>
+            <div class="mockup-container detail-preview">
+                <img id="detailPreviewImg" class="mockup-img" src="https://picsum.photos/1080/1920" alt="Detail Preview">
+
+                <div class="blur-overlay"></div>
+
+                <div class="content-layer">
+                    <span class="badge prevBadge">CHALLENGE</span>
+                    <div class="event-title prevTitle">Event Name</div>
+                    <div class="event-short prevShort">Short description goes here.</div>
+                </div>
+            </div>
+            <div class="detail-info"></div>
+        </div>
+
+    </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SEO CONTENT BLOCK -->
+<!-- ============================================================ -->
+<section class="tool-content">
+
+  <h2>What does the App Store Event Previewer do?</h2>
+  <p>This tool shows you exactly how an In-App Event will look on the App Store before you submit it in App Store Connect — both the compact Event Card shown in search and browse, and the full-screen Detail view a user sees after tapping in. It replicates Apple's signature bottom-blur treatment, where the image fades into a frosted, tinted overlay behind the title and description text.</p>
+  <p>Fill in your badge, event name, and descriptions on the left, and upload your landscape (16:9) and portrait (9:16) artwork — the previews update live as you type, with character counters matching Apple's actual limits for each field.</p>
+  <p>Everything runs client-side: uploaded images are read locally in your browser and never leave your device.</p>
+
+  <h2>Frequently asked questions</h2>
+
+  <div class="faq-item">
+    <details>
+      <summary>Is the App Store Event Previewer free to use?</summary>
+      <p>Yes, completely free with no account or usage limit.</p>
+    </details>
+  </div>
+
+  <div class="faq-item">
+    <details>
+      <summary>Are my images uploaded to a server?</summary>
+      <p>No. Images are loaded locally in your browser using the File API and never leave your device.</p>
+    </details>
+  </div>
+
+  <div class="faq-item">
+    <details>
+      <summary>What image sizes should I use?</summary>
+      <p>Use a 1920×1080 landscape image for the Event Card, and a 1080×1920 portrait image for the Detail view — matching Apple's recommended In-App Event asset dimensions.</p>
+    </details>
+  </div>
+
+  <div class="faq-item">
+    <details>
+      <summary>Does this exactly match what Apple will render?</summary>
+      <p>It's a close visual approximation using the same blur-and-tint technique Apple uses, built to help you catch layout, contrast, and copy-length issues before submission — but always double-check the final result in App Store Connect's own preview before publishing.</p>
+    </details>
+  </div>
+
+  <div class="faq-item">
+    <details>
+      <summary>Can I use this before submitting my event in App Store Connect?</summary>
+      <p>Yes — that's exactly what it's for. Draft and sanity-check your event's copy and imagery here first, then carry the finalised text and assets over into App Store Connect.</p>
+    </details>
+  </div>
+
+  <h2>Related tools</h2>
+  <div class="related-tools">
+    <a class="related-tools__card" href="https://pierrecochart.github.io/advanced-image-cropping-tool/">
+      <p class="related-tools__eyebrow">Image &amp; Media</p>
+      <p class="related-tools__name">Advanced Image Cropper</p>
+      <p class="related-tools__desc">Crop your artwork to the exact 16:9 and 9:16 ratios this tool needs.</p>
+    </a>
+    <a class="related-tools__card" href="https://pierrecochart.github.io/image-to-webp-converter/">
+      <p class="related-tools__eyebrow">Image &amp; Media</p>
+      <p class="related-tools__name">Image to WebP Converter</p>
+      <p class="related-tools__desc">Optimise your event artwork before uploading it anywhere else.</p>
+    </a>
+    <a class="related-tools__card" href="https://pierrecochart.github.io/github-website-builder/">
+      <p class="related-tools__eyebrow">Development</p>
+      <p class="related-tools__name">GitHub Website Builder</p>
+      <p class="related-tools__desc">A free homepage builder for showcasing your apps and projects.</p>
+    </a>
+  </div>
+
+</section>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    { "@type": "Question", "name": "Is the App Store Event Previewer free to use?", "acceptedAnswer": { "@type": "Answer", "text": "Yes, completely free with no account or usage limit." } },
+    { "@type": "Question", "name": "Are my images uploaded to a server?", "acceptedAnswer": { "@type": "Answer", "text": "No. Images are loaded locally in your browser using the File API and never leave your device." } },
+    { "@type": "Question", "name": "What image sizes should I use?", "acceptedAnswer": { "@type": "Answer", "text": "Use a 1920x1080 landscape image for the Event Card, and a 1080x1920 portrait image for the Detail view — matching Apple's recommended In-App Event asset dimensions." } },
+    { "@type": "Question", "name": "Does this exactly match what Apple will render?", "acceptedAnswer": { "@type": "Answer", "text": "It's a close visual approximation using the same blur-and-tint technique Apple uses, built to help you catch layout, contrast, and copy-length issues before submission — but always double-check the final result in App Store Connect's own preview before publishing." } },
+    { "@type": "Question", "name": "Can I use this before submitting my event in App Store Connect?", "acceptedAnswer": { "@type": "Answer", "text": "Yes — that's exactly what it's for. Draft and sanity-check your event's copy and imagery here first, then carry the finalised text and assets over into App Store Connect." } }
+  ]
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "App Store Event Previewer",
+  "url": "https://pierrecochart.github.io/app-store-event-previewer/",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Any (runs in browser)",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "GBP" },
+  "creator": { "@type": "Person", "name": "Pierre Cochart", "url": "https://pierrecochart.github.io/" }
+}
+</script>
+
+<!-- ============================================================ -->
+<!-- SITE FOOTER -->
+<!-- ============================================================ -->
+<footer class="site-footer">
+  <div class="site-footer__cta">
+    <div class="site-footer__cta-inner">
+      <div>
+        <p class="site-footer__cta-text">Need more than a free tool?</p>
+        <p class="site-footer__cta-heading">The Search Foundry runs SEO &amp; PPC strategy for growing brands.</p>
+      </div>
+      <a class="site-footer__cta-link" href="https://searchfoundry.co.uk" target="_blank" rel="noopener">Talk to the agency ↗</a>
+    </div>
+  </div>
+
+  <div class="site-footer__inner">
+    <div class="site-footer__col">
+      <h3>Image &amp; Media</h3>
+      <ul>
+        <li><a href="https://pierrecochart.github.io/image-cropper/">Bulk Image Cropper</a></li>
+        <li><a href="https://pierrecochart.github.io/image-background-remover/">Image Background Remover</a></li>
+        <li><a href="https://pierrecochart.github.io/color-palette-generator/">Color Palette Generator</a></li>
+        <li><a href="https://pierrecochart.github.io/duotone-generator/">Duotone Generator</a></li>
+        <li><a href="https://pierrecochart.github.io/image-dithering-tool/">Image Dithering Tool</a></li>
+        <li><a href="https://pierrecochart.github.io/advanced-image-cropping-tool/">Advanced Image Cropper</a></li>
+        <li><a href="https://pierrecochart.github.io/image-to-webp-converter/">Image to WebP Converter</a></li>
+        <li><a href="https://pierrecochart.github.io/quickfav-favicon-maker/">QuickFav Favicon Maker</a></li>
+        <li><a href="https://pierrecochart.github.io/svg-cleaner/">SVG Cleaner</a></li>
+        <li><a href="https://pierrecochart.github.io/code-screenshot-image-creator/">Code Screenshot Generator</a></li>
+      </ul>
+    </div>
+    <div class="site-footer__col">
+      <h3>SEO &amp; Content</h3>
+      <ul>
+        <li><a href="https://pierrecochart.github.io/canonical-generating-tool/">Canonical Generator</a></li>
+        <li><a href="https://pierrecochart.github.io/useful-links-builder/">Useful Links Builder</a></li>
+        <li><a href="https://pierrecochart.github.io/hreflang-generator-tool/">Hreflang Generator</a></li>
+        <li><a href="https://pierrecochart.github.io/website-migration-bulk-redirect-tool/">Bulk Redirect Mapper</a></li>
+        <li><a href="https://pierrecochart.github.io/google-dork-search-operator-tool/">Google Dork Builder</a></li>
+        <li><a href="https://pierrecochart.github.io/keyword-mixer-tool/">Keyword Mixer</a></li>
+        <li><a href="https://pierrecochart.github.io/SERP-Snippet-Viewer-Optimiser/">SERP Simulator</a></li>
+        <li><a href="https://pierrecochart.github.io/seo-bulk-header-audit-tool/">SEO Header Audit</a></li>
+        <li><a href="https://pierrecochart.github.io/faq-generator/">FAQ &amp; Schema Generator</a></li>
+        <li><a href="https://pierrecochart.github.io/internal-link-weaver/">Internal Link Weaver</a></li>
+        <li><a href="https://pierrecochart.github.io/word-character-counter-read-time/">Word &amp; Character Counter</a></li>
+        <li><a href="https://pierrecochart.github.io/ai-blog-summarizer-button-generator/">AI Blog Summarizer</a></li>
+      </ul>
+    </div>
+    <div class="site-footer__col">
+      <h3>PPC &amp; Analytics</h3>
+      <ul>
+        <li><a href="https://pierrecochart.github.io/google-adwords-campaign-architect-tool/">AdWords Architect</a></li>
+        <li><a href="https://pierrecochart.github.io/roas-modeller/">ROAS Modeller</a></li>
+        <li><a href="https://pierrecochart.github.io/statistical-significance-calculator/">Significance Calculator</a></li>
+      </ul>
+    </div>
+    <div class="site-footer__col">
+      <h3>Development</h3>
+      <ul>
+        <li><a href="https://pierrecochart.github.io/document-html-link-remover/">Link Remover Tool</a></li>
+        <li><a href="https://pierrecochart.github.io/word-doc-content-sanitizer/">Word Content Sanitizer</a></li>
+        <li><a href="https://pierrecochart.github.io/github-website-builder/">GitHub Website Builder</a></li>
+        <li><a href="https://pierrecochart.github.io/html-editor/">HTML Editor</a></li>
+        <li><a href="https://pierrecochart.github.io/app-store-event-previewer/">App Store Event Previewer</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="site-footer__bottom">
+    <p>&copy; <span id="footerYear"></span> <a href="https://uk.linkedin.com/in/pierrecochart">Pierre Cochart</a>. Free, open-source, client-side tools.</p>
+    <p>Built &amp; maintained by <a href="https://searchfoundry.co.uk" target="_blank" rel="noopener">The Search Foundry</a></p>
+  </div>
+</footer>
+
+<!-- Floating BMC widget — standard on every page -->
+<script data-name="BMC-Widget" data-cfasync="false" src="https://cdnjs.buymeacoffee.com/1.0.0/widget.prod.min.js" data-id="PierreCochart" data-description="Support me on Buy me a coffee!" data-message="" data-color="#0F6E8C" data-position="Right" data-x_margin="18" data-y_margin="18"></script>
+
+<script>
+    function updatePreview(inputElement) {
+        const badge = document.getElementById('badgeSelect').value;
+        const title = document.getElementById('eventName').value || "Event Name";
+        const short = document.getElementById('shortDesc').value || "Short description goes here.";
+
+        document.querySelectorAll('.prevBadge').forEach(el => el.textContent = badge);
+        document.querySelectorAll('.prevTitle').forEach(el => el.textContent = title);
+        document.querySelectorAll('.prevShort').forEach(el => el.textContent = short);
+
+        if(inputElement) {
+            const countSpan = inputElement.nextElementSibling.querySelector('span');
+            const max = inputElement.getAttribute('maxlength');
+            const current = inputElement.value.length;
+            countSpan.textContent = current;
+
+            if(current >= max) {
+                inputElement.nextElementSibling.classList.add('limit-reached');
+            } else {
+                inputElement.nextElementSibling.classList.remove('limit-reached');
             }
         }
+    }
 
-        function loadImage(input, imgId) {
-            if (input.files && input.files[0]) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    document.getElementById(imgId).src = e.target.result;
-                }
-                reader.readAsDataURL(input.files[0]);
+    function loadImage(input, imgId) {
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById(imgId).src = e.target.result;
             }
+            reader.readAsDataURL(input.files[0]);
         }
-    </script>
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        var footerYearEl = document.getElementById('footerYear');
+        if (footerYearEl) footerYearEl.textContent = new Date().getFullYear();
+
+        var toggle = document.getElementById('navToggle');
+        var nav = document.getElementById('siteNav');
+        if (toggle && nav) {
+            toggle.addEventListener('click', function () {
+                var isOpen = nav.classList.toggle('is-open');
+                toggle.setAttribute('aria-expanded', isOpen);
+            });
+        }
+        document.querySelectorAll('.has-dropdown > .site-nav__link').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                if (window.innerWidth > 860) return;
+                var parent = btn.closest('.has-dropdown');
+                var isOpen = parent.classList.toggle('is-open');
+                btn.setAttribute('aria-expanded', isOpen);
+            });
+        });
+    });
+</script>
 </body>
 </html>
